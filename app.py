@@ -208,8 +208,10 @@ if sel_reporter == REPORTER_DIVIDER:
     st.session_state["sel_reporter"] = ALL_REPORTERS[0]
     st.rerun()
 
-# ── Product / 전체선택·전체해제 / HS Code — 한 줄을 3등분해서 나란히 배치 ──
-prod_col1, prod_col2, prod_col3 = st.columns([1, 1.3, 4])
+# ── Product / 전체선택·전체해제는 한 줄, HS Code는 전체 폭을 쓰는 별도 줄 ──
+# (HS Code pills 위젯은 좁은 column 안에 넣으면 줄바꿈이 안 되고 옆으로 삐져나가서,
+#  전체 폭을 줘야 화면 안에서 자동으로 여러 줄로 줄바꿈된다)
+prod_col1, prod_col2 = st.columns([1.5, 4])
 with prod_col1:
     sel_product = st.selectbox("Product (제품군)", list(PRODUCT_HS_CODES.keys()), key="sel_product")
 
@@ -231,15 +233,14 @@ with prod_col2:
             st.session_state[hs_key] = []
             st.rerun()
 
-with prod_col3:
-    sel_hscodes = st.pills(
-        "HS Code",
-        all_codes_for_product,
-        selection_mode="multi",
-        format_func=_hs_label,
-        key=hs_key,
-    )
-    sel_hscodes = sel_hscodes or []
+sel_hscodes = st.pills(
+    "HS Code",
+    all_codes_for_product,
+    selection_mode="multi",
+    format_func=_hs_label,
+    key=hs_key,
+)
+sel_hscodes = sel_hscodes or []
 
 st.caption("선택된 HS Code: " + (", ".join(sel_hscodes) if sel_hscodes else "없음") + "  (수량 단위: 톤, netWgt 기준)")
 
