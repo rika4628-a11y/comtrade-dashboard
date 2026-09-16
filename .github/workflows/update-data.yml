@@ -1,0 +1,35 @@
+name: Comtrade 분기별 자동 갱신
+
+on:
+  schedule:
+    - cron: "0 22 1 1,4,7,10 *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Python 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: UN Comtrade 데이터 수집 (최근 3개년)
+        env:
+          COMTRADE_API_KEY: ${{ secrets.COMTRADE_API_KEY }}
+        run: python fetch_data.py
+
+      - name: 변경사항 커밋 & 푸시
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "자동 갱신: UN Comtrade 데이터 (분기별 스케줄)"
+          file_pattern: data/comtrade_raw.csv
