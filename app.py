@@ -208,37 +208,45 @@ if sel_reporter == REPORTER_DIVIDER:
     st.session_state["sel_reporter"] = ALL_REPORTERS[0]
     st.rerun()
 
-# ── Product / 전체선택 / 전체해제 / HS Code — 한 줄에 전부, HS Code만 자동 줄바꿈 ──
-prod_col1, prod_col2, prod_col3, prod_col4 = st.columns([1.3, 0.7, 0.7, 4.3])
+# ── Product / 전체선택 / 전체해제 — 한 줄 / HS Code는 4개씩 고정 줄바꿈(체크박스) ──
+prod_col1, prod_col2, prod_col3 = st.columns([1.5, 1, 1])
 with prod_col1:
     sel_product = st.selectbox("Product (제품군)", list(PRODUCT_HS_CODES.keys()), key="sel_product")
 
 all_codes_for_product = PRODUCT_HS_CODES[sel_product]
-hs_key = f"sel_hscodes_{sel_product}"
 
-if hs_key not in st.session_state:
-    st.session_state[hs_key] = list(all_codes_for_product)
+# 코드별 체크박스 상태 키
+def _cb_key(code):
+    return f"cb_{sel_product}_{code}"
+
+# 최초 진입 시 기본값: 전체 선택
+for code in all_codes_for_product:
+    if _cb_key(code) not in st.session_state:
+        st.session_state[_cb_key(code)] = True
 
 with prod_col2:
     st.write("")
     if st.button("전체선택", key=f"hs_all_{sel_product}", use_container_width=True):
-        st.session_state[hs_key] = list(all_codes_for_product)
+        for code in all_codes_for_product:
+            st.session_state[_cb_key(code)] = True
         st.rerun()
 with prod_col3:
     st.write("")
     if st.button("전체해제", key=f"hs_none_{sel_product}", use_container_width=True):
-        st.session_state[hs_key] = []
+        for code in all_codes_for_product:
+            st.session_state[_cb_key(code)] = False
         st.rerun()
-with prod_col4:
-    sel_hscodes = st.pills(
-        "HS Code",
-        all_codes_for_product,
-        selection_mode="multi",
-        format_func=_hs_label,
-        key=hs_key,
-        label_visibility="collapsed",
-    )
-    sel_hscodes = sel_hscodes or []
+
+st.markdown("**HS Code**")
+PER_ROW = 4  # 한 줄에 몇 개씩 고정 배치할지 (화면 폭과 무관하게 항상 이 개수로 줄바꿈)
+for i in range(0, len(all_codes_for_product), PER_ROW):
+    row_codes = all_codes_for_product[i:i + PER_ROW]
+    row_cols = st.columns(PER_ROW)
+    for col, code in zip(row_cols, row_codes):
+        with col:
+            st.checkbox(_hs_label(code), key=_cb_key(code))
+
+sel_hscodes = [c for c in all_codes_for_product if st.session_state[_cb_key(c)]]
 
 st.caption("선택된 HS Code: " + (", ".join(sel_hscodes) if sel_hscodes else "없음") + "  (수량 단위: 톤, netWgt 기준)")
 
