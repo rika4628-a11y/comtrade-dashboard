@@ -208,7 +208,7 @@ if sel_reporter == REPORTER_DIVIDER:
     st.session_state["sel_reporter"] = ALL_REPORTERS[0]
     st.rerun()
 
-# ── Product(제품군) / HS Code — Product는 위 줄, HS Code는 전체 폭으로 아래 줄 ──
+# ── Product / 전체선택·전체해제 / HS Code — 한 줄을 3등분해서 나란히 배치 ──
 prod_col1, prod_col2, prod_col3 = st.columns([1, 1, 1])
 with prod_col1:
     sel_product = st.selectbox("Product (제품군)", list(PRODUCT_HS_CODES.keys()), key="sel_product")
@@ -221,23 +221,25 @@ if hs_key not in st.session_state:
 
 with prod_col2:
     st.write("")
-    if st.button("전체선택", key=f"hs_all_{sel_product}", use_container_width=True):
-        st.session_state[hs_key] = list(all_codes_for_product)
-        st.rerun()
-with prod_col3:
-    st.write("")
-    if st.button("전체해제", key=f"hs_none_{sel_product}", use_container_width=True):
-        st.session_state[hs_key] = []
-        st.rerun()
+    btn_a, btn_b = st.columns(2)
+    with btn_a:
+        if st.button("전체선택", key=f"hs_all_{sel_product}", use_container_width=True):
+            st.session_state[hs_key] = list(all_codes_for_product)
+            st.rerun()
+    with btn_b:
+        if st.button("전체해제", key=f"hs_none_{sel_product}", use_container_width=True):
+            st.session_state[hs_key] = []
+            st.rerun()
 
-sel_hscodes = st.pills(
-    "HS Code",
-    all_codes_for_product,
-    selection_mode="multi",
-    format_func=_hs_label,
-    key=hs_key,
-)
-sel_hscodes = sel_hscodes or []
+with prod_col3:
+    sel_hscodes = st.pills(
+        "HS Code",
+        all_codes_for_product,
+        selection_mode="multi",
+        format_func=_hs_label,
+        key=hs_key,
+    )
+    sel_hscodes = sel_hscodes or []
 
 st.caption("선택된 HS Code: " + (", ".join(sel_hscodes) if sel_hscodes else "없음") + "  (수량 단위: 톤, netWgt 기준)")
 
