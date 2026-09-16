@@ -208,45 +208,59 @@ if sel_reporter == REPORTER_DIVIDER:
     st.session_state["sel_reporter"] = ALL_REPORTERS[0]
     st.rerun()
 
-# ── Product / 전체선택 / 전체해제 — 한 줄 / HS Code는 4개씩 고정 줄바꿈(체크박스) ──
-prod_col1, prod_col2, prod_col3 = st.columns([1.5, 1, 1])
+# ── Product / 전체선택 / 전체해제 / HS Code — 한 줄 배치 ──
+# HS Code는 4개씩 끊어서 여러 개의 pills 위젯으로 나눠 그린다.
+# (하나의 pills 위젯에 전부 넣으면 화면 폭에 따라 줄바꿈이 안 되고 옆으로 삐져나가기 때문)
+prod_col1, prod_col2, prod_col3, prod_col4 = st.columns([1.3, 0.7, 0.7, 4.3])
 with prod_col1:
     sel_product = st.selectbox("Product (제품군)", list(PRODUCT_HS_CODES.keys()), key="sel_product")
 
 all_codes_for_product = PRODUCT_HS_CODES[sel_product]
 
-# 코드별 체크박스 상태 키
-def _cb_key(code):
-    return f"cb_{sel_product}_{code}"
+PER_ROW = 4  # 한 줄에 배치할 HS Code 개수 (화면 폭과 무관하게 항상 이 개수로 줄바꿈)
+_hs_chunks = [
+    all_codes_for_product[i:i + PER_ROW]
+    for i in range(0, len(all_codes_for_product), PER_ROW)
+]
+
+
+def _chunk_key(idx):
+    return f"hs_{sel_product}_{idx}"
+
 
 # 최초 진입 시 기본값: 전체 선택
-for code in all_codes_for_product:
-    if _cb_key(code) not in st.session_state:
-        st.session_state[_cb_key(code)] = True
+for _i, _chunk in enumerate(_hs_chunks):
+    if _chunk_key(_i) not in st.session_state:
+        st.session_state[_chunk_key(_i)] = list(_chunk)
 
 with prod_col2:
     st.write("")
     if st.button("전체선택", key=f"hs_all_{sel_product}", use_container_width=True):
-        for code in all_codes_for_product:
-            st.session_state[_cb_key(code)] = True
+        for _i, _chunk in enumerate(_hs_chunks):
+            st.session_state[_chunk_key(_i)] = list(_chunk)
         st.rerun()
 with prod_col3:
     st.write("")
     if st.button("전체해제", key=f"hs_none_{sel_product}", use_container_width=True):
-        for code in all_codes_for_product:
-            st.session_state[_cb_key(code)] = False
+        for _i in range(len(_hs_chunks)):
+            st.session_state[_chunk_key(_i)] = []
         st.rerun()
 
-st.markdown("**HS Code**")
-PER_ROW = 4  # 한 줄에 몇 개씩 고정 배치할지 (화면 폭과 무관하게 항상 이 개수로 줄바꿈)
-for i in range(0, len(all_codes_for_product), PER_ROW):
-    row_codes = all_codes_for_product[i:i + PER_ROW]
-    row_cols = st.columns(PER_ROW)
-    for col, code in zip(row_cols, row_codes):
-        with col:
-            st.checkbox(_hs_label(code), key=_cb_key(code))
+with prod_col4:
+    sel_hscodes = []
+    for _i, _chunk in enumerate(_hs_chunks):
+        _picked = st.pills(
+            "HS Code",
+            _chunk,
+            selection_mode="multi",
+            format_func=_hs_label,
+            key=_chunk_key(_i),
+            label_visibility="collapsed",
+        )
+        sel_hscodes.extend(_picked or [])
 
-sel_hscodes = [c for c in all_codes_for_product if st.session_state[_cb_key(c)]]
+# 원래 코드 순서대로 정렬
+sel_hscodes = [c for c in all_codes_for_product if c in set(sel_hscodes)]
 
 st.caption("선택된 HS Code: " + (", ".join(sel_hscodes) if sel_hscodes else "없음") + "  (수량 단위: 톤, netWgt 기준)")
 
