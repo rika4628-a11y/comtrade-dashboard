@@ -209,7 +209,7 @@ if sel_reporter == REPORTER_DIVIDER:
     st.rerun()
 
 # ── Product / 전체선택·전체해제 / HS Code — 한 줄을 3등분해서 나란히 배치 ──
-prod_col1, prod_col2, prod_col3 = st.columns([1, 1, 1])
+prod_col1, prod_col2, prod_col3 = st.columns([1, 1.3, 4])
 with prod_col1:
     sel_product = st.selectbox("Product (제품군)", list(PRODUCT_HS_CODES.keys()), key="sel_product")
 
