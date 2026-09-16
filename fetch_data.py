@@ -29,7 +29,7 @@ HS_CODES = ",".join([HS_CODES_CR, HS_CODES_HR])  # 한번에 다 받아서 app.p
 OUT_DIR = os.path.join(os.path.dirname(__file__), "data")
 OUT_PATH = os.path.join(OUT_DIR, "comtrade_raw.csv")
 KEEP_COLS = ["period", "reporterDesc", "flowDesc", "partnerDesc", "cmdCode", "cmdDesc", "netWgt"]
-RECENT_YEARS_COUNT = 3  # 인자 없이 실행 시 "올해 포함 최근 N개년" 자동 수집
+RECENT_YEARS_COUNT = 5  # 인자 없이 실행 시 "올해 포함 최근 N개년" 자동 수집
 AGGREGATE_NAMES = {"World"}  # 이 이름에 해당하는 행은 partner/reporter 어느 쪽이든 제외
 
 
