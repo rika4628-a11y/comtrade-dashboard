@@ -208,8 +208,8 @@ if sel_reporter == REPORTER_DIVIDER:
     st.session_state["sel_reporter"] = ALL_REPORTERS[0]
     st.rerun()
 
-# ── Product(제품군) / HS Code — 한 줄에 모아서 선택 ─────────────
-prod_col1, prod_col2, prod_col3, prod_col4 = st.columns([1.3, 0.7, 0.7, 4.3])
+# ── Product(제품군) / HS Code — Product는 위 줄, HS Code는 전체 폭으로 아래 줄 ──
+prod_col1, prod_col2, prod_col3 = st.columns([1.3, 0.7, 0.7])
 with prod_col1:
     sel_product = st.selectbox("Product (제품군)", list(PRODUCT_HS_CODES.keys()), key="sel_product")
 
@@ -229,16 +229,15 @@ with prod_col3:
     if st.button("전체해제", key=f"hs_none_{sel_product}", use_container_width=True):
         st.session_state[hs_key] = []
         st.rerun()
-with prod_col4:
-    sel_hscodes = st.pills(
-        "HS Code",
-        all_codes_for_product,
-        selection_mode="multi",
-        format_func=_hs_label,
-        key=hs_key,
-        label_visibility="collapsed",
-    )
-    sel_hscodes = sel_hscodes or []
+
+sel_hscodes = st.pills(
+    "HS Code",
+    all_codes_for_product,
+    selection_mode="multi",
+    format_func=_hs_label,
+    key=hs_key,
+)
+sel_hscodes = sel_hscodes or []
 
 st.caption("선택된 HS Code: " + (", ".join(sel_hscodes) if sel_hscodes else "없음") + "  (수량 단위: 톤, netWgt 기준)")
 
