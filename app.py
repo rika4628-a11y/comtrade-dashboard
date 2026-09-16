@@ -209,7 +209,7 @@ if sel_reporter == REPORTER_DIVIDER:
     st.rerun()
 
 # ── Product(제품군) / HS Code — Product는 위 줄, HS Code는 전체 폭으로 아래 줄 ──
-prod_col1, prod_col2, prod_col3 = st.columns([1.3, 0.7, 0.7])
+prod_col1, prod_col2, prod_col3 = st.columns([1.5, 2, 2])
 with prod_col1:
     sel_product = st.selectbox("Product (제품군)", list(PRODUCT_HS_CODES.keys()), key="sel_product")
 
